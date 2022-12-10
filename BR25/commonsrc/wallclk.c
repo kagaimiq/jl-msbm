@@ -1,6 +1,7 @@
 #include <jl_regs.h>
 #include <jl_irq.h>
 #include "wallclk.h"
+#include <stdio.h>
 
 // hardcoded...
 #define PERIOD_1MS		(48000000 / 1000)
@@ -32,7 +33,7 @@ uint64_t micros(void) {
 }
 
 void usleep(uint32_t us) {
-	for (uint64_t target = micros() + us; micros() < us; );
+	for (uint64_t target = micros() + us; micros() < target; );
 }
 
 
@@ -41,5 +42,5 @@ uint32_t millis(void) {
 }
 
 void delay(uint32_t ms) {
-	for (uint32_t target = millis() + ms; millis() < ms; );
+	for (uint32_t target = millis() + ms + 1; millis() < target; );
 }
