@@ -213,3 +213,5 @@ _IRQ_MEM_ADDR					= 0x31f00;
 _MASK_MEM_BEGIN					= 0x31b60;
 _MASK_MEM_END					= _MASK_MEM_BEGIN + 0x318;
 */
+
+/*mask_putchar					= 0x31cdc;*/

@@ -66,27 +66,54 @@ void JieLi(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	wallclk_init();
 
 	static FATFS ftfs;
+	FRESULT fr;
+
 	xprintf("mount---%d\n", f_mount(&ftfs, "0:", 1));
 
-	
+	{
+		DIR dir;
+
+		if ((fr = f_opendir(&dir, "/Music/ELECTR~1")) == FR_OK) {
+			for (;;) {
+				FILINFO finfo;
+				if ((fr = f_readdir(&dir, &finfo)) != FR_OK || !finfo.fname[0]) break;
+
+				xprintf("%s\n", finfo.fname);
+			}
+
+			f_closedir(&dir);
+		}
+	}
+
+	{
+		static FIL fil;
+		UINT cnt;
+
+		if ((fr = f_open(&fil, "/testjielitech.bin", FA_WRITE|FA_CREATE_ALWAYS)) == FR_OK) {
+			f_write(&fil, "kagami hiiragi", 15, &cnt);
+			f_write(&fil, "JIELI TECHNOLOGY", 18, &cnt);
+
+			f_close(&fil);
+		}
+	}
 
 	/*==================================================================*/
 
-	#if 1
+	#if 0
 	#define P3_EFUSE_CON0		0xb0
 	#define P3_EFUSE_CON1		0xb1
 	#define P3_EFUSE_RDAT		0xb2
 
-	/*for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		int sel1 = i >> 2, sel2 = i & 3;
 
 		p33_tx_1byte(P3_EFUSE_CON0, (sel1<<6));
 		p33_tx_1byte(P3_EFUSE_CON1, (sel2<<2)|(1<<7)|(1<<1));
 		xprintf("%d.%d: %02x\n", sel1, sel2, p33_rx_1byte(P3_EFUSE_RDAT));
 		p33_tx_1byte(P3_EFUSE_CON1, 0);
-	}*/
+	}
 
-	for (int i = 0; i < 256; i++) {
+	/*for (int i = 0; i < 256; i++) {
 		xprintf("%02x: ", i);
 		p33_tx_1byte(P3_EFUSE_CON0, i);
 
@@ -97,7 +124,7 @@ void JieLi(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 		}
 
 		xputc('\n');
-	}
+	}*/
 	#endif
 
 	#if 0

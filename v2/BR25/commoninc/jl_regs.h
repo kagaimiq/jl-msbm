@@ -447,9 +447,27 @@ static inline uint32_t reg32_rsmask(uint32_t addr, int shift, uint32_t mask) {
 #define IIC_base		0x1E2400
 
 #define IIC_CON0			0x00	// control 0
+#define 	IIC_CON0_en			IIC_CON0, 0, 1		// enable
+#define 	IIC_CON0_slave			IIC_CON0, 1, 1		// slave mode [0: master | 1: slave]
+#define 	IIC_CON0_n_cfg_done		IIC_CON0, 2, 1		// fire a transfer
+#define 	IIC_CON0_dat_dir		IIC_CON0, 3, 1		// data direction [0: send | 1: receive]
+#define 	IIC_CON0_m_set_end		IIC_CON0, 4, 1		// send stop
+#define 	IIC_CON0_m_set_rstart		IIC_CON0, 5, 1		// send (re)start
+#define 	IIC_CON0_wr_ack			IIC_CON0, 6, 1		// txed ack [0: ack | 1: nak]
+#define 	IIC_CON0_rd_ack			IIC_CON0, 7, 1		// rxed ack [0: ack | 1: nak]
+#define 	IIC_CON0_ie			IIC_CON0, 8, 1		// interrupt enable
+#define 	IIC_CON0_iic_isel		IIC_CON0, 9, 1		// input sel [0: direct | 1: filtered]
+#define 	IIC_CON0_end_pnd_ie		IIC_CON0, 10, 1		// enable end interrupt
+#define 	IIC_CON0_end_pnd_clr		IIC_CON0, 12, 1		// clear pending end int
+#define 	IIC_CON0_end_pnd		IIC_CON0, 13, 1		// end int pending
+#define 	IIC_CON0_pclr			IIC_CON0, 14, 1		// clear pending int
+#define 	IIC_CON0_pnd			IIC_CON0, 15, 1		// interrupt pending
 #define IIC_BUF				0x04	// data reg
-#define IIC_BAUD			0x08	// baudrate
+#define IIC_BAUD			0x08	// baudrate / slave address
 #define IIC_CON1			0x0C	// control 1
+#define 	IIC_CON1_si_mode		IIC_CON1, 13, 1		// 1 = only respond to its address (slave)
+#define 	IIC_CON1_spnd_clr		IIC_CON1, 14, 1		// clear start rx pending
+#define 	IIC_CON1_spnd			IIC_CON1, 15, 1		// start rx pending
 
 /*================= PAP =================*/
 // parralel active port
@@ -671,7 +689,7 @@ static inline uint32_t reg32_rsmask(uint32_t addr, int shift, uint32_t mask) {
 // advanced encryption standard (aes) engine
 #define AES_base		0x1E4300
 
-#define AES_CON				0x00	// control key
+#define AES_CON				0x00	// control reg
 #define AES_DATIN			0x04	// input data
 #define AES_KEY				0x08	// key
 #define AES_ENCRES0			0x0C	// encryped result 0
@@ -811,7 +829,6 @@ static inline uint32_t reg32_rsmask(uint32_t addr, int shift, uint32_t mask) {
 
 #define SFC_CON				0x00	// control
 #define 	SFC_CON_enable			SFC_CON, 0, 1		// enable
-
 #define SFC_BAUD			0x04	// baudrate
 #define SFC_CODE			0x08
 #define SFC_BASE_ADR			0x0C	// map offset in flash
@@ -823,12 +840,12 @@ static inline uint32_t reg32_rsmask(uint32_t addr, int shift, uint32_t mask) {
 
 #define SFCENC_CON			0x00	// control
 #define 	SFCENC_CON_enable		SFCENC_CON, 0, 1	// enable
-#define 	SFCENC_CON_bit1			SFCENC_CON, 1, 1	// ?? cleared
+#define 	SFCENC_CON_en_unenc		SFCENC_CON, 1, 1	// enable unenc/lenc areas
 #define SFCENC_KEY			0x04	// key
-#define SFCENC_UNENC_ADRH		0x08
-#define SFCENC_UNENC_ADRL		0x0C
-#define SFCENC_LENC_ADRH		0x10
-#define SFCENC_LENC_ADRL		0x14
+#define SFCENC_UNENC_ADRH		0x08	// unencrypted area end
+#define SFCENC_UNENC_ADRL		0x0C	// unencrypted area begin
+#define SFCENC_LENC_ADRH		0x10	// lenc area end
+#define SFCENC_LENC_ADRL		0x14	// lenc area begin
 
 /*================ PSRAM ================*/
 // spi psram controller (ABSENT!)

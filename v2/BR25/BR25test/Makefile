@@ -1,8 +1,8 @@
-TARGET = JieLiKudasai
+TARGET = BR25test1
 
 OBJS = \
-	head.o \
-	neko.o
+	pre.o \
+	kotatsu.o
 
 CFLAGS  = -Werror -O2 -mcpu=r3
 ASFLAGS = -c
@@ -13,12 +13,14 @@ LDFLAGS += -T ../commoninc/maskrom_stuff.ld
 
 CFLAGS += -I ../commonsrc
 OBJS += \
-	../commonsrc/xprintf.o
+	../commonsrc/xprintf.o \
+	../commonsrc/wallclk.o \
+	../commonsrc/jl_irq.o
 
 #------------------------------------------------------------------------
 
 # You can get the toolchain from here: https://doc.zh-jieli.com/Tools/zh-cn/other_info/index.html
-JL_TOOLCHAIN_DIR = ../../../../Toolchain/pi32v2
+JL_TOOLCHAIN_DIR = ../../../Toolchain/pi32v2
 
 #for some reason these directories is not being put in the compilation flags
 # so the libc stuff (-lc, string.h, etc) is not available
@@ -33,9 +35,9 @@ OBJDUMP = $(JL_TOOLCHAIN_BIN)objdump
 OBJCOPY = llvm-objcopy
 SIZE    = llvm-size
 
-all: $(TARGET).elf
+all: $(TARGET).elf $(TARGET).bin
 
-.PHONY: all clean flash
+.PHONY: all clean run
 
 clean:
 	rm -f $(OBJS)
@@ -50,3 +52,9 @@ $(TARGET).elf: $(OBJS)
 
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
+
+JL_ARG ?= 0x4777
+
+run: $(TARGET).bin
+	python3 ../../../jl-uboot-tool_0/the-tool/jlrunner.py \
+		--device $(JL_DEVICE) 0x12000 $< --arg $(JL_ARG)

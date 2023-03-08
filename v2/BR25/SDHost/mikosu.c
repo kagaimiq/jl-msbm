@@ -297,10 +297,45 @@ DRESULT disk_ioctl(BYTE drv, BYTE cmd, void *buff) {
 
 
 
-void DirTree(char *path) {
-	
+
+void sflash_init(void) {
+	reg32_wsmask(PORTD_base+PORTx_DIRn(0), 0); // PD0 out  -> SCK
+	reg32_wsmask(PORTD_base+PORTx_DIRn(1), 0); // PD1 out  -> MOSI
+	reg32_wsmask(PORTD_base+PORTx_DIRn(2), 1); // PD2 in   -> MISO
+	reg32_wsmask(PORTD_base+PORTx_DIRn(3), 0); // PD3 out  -> CS
+	reg32_wsmask(PORTD_base+PORTx_DIRn(4), 0); // PD4 out  -> ?? HOLD? Power?!
+
+	reg32_wsmask(PORTD_base+PORTx_OUTn(3), 1); // PD3 high
+	reg32_wsmask(PORTD_base+PORTx_OUTn(4), 1); // PD4 high
+
+	reg32_wsmask(IOMAP_base+IOMAP_CON0_spi0ios, 0x0); // SPI0 on PD3/PD2/PD1/PD0
+
+	reg32_write(SPI0_base+SPIx_CON, 0x20);
+	reg32_write(SPI0_base+SPIx_BAUD, 32); // some clock speed
+	reg32_wsmask(SPI0_base+SPIx_CON_bidir, 1); // full duplex
+	reg32_wsmask(SPI0_base+SPIx_CON_spie, 1);
+
+	for (volatile int i = 100000; i; i--); // stutter
 }
 
+void sflash_sel(char sel) {
+	reg32_wsmask(PORTD_base+PORTx_OUTn(3), !sel); // CS
+}
+
+uint8_t sflash_bytexfer(uint8_t val) {
+	reg32_write(SPI0_base+SPIx_BUF, val);
+	while (!reg32_rsmask(SPI0_base+SPIx_CON_pnd));
+	reg32_wsmask(SPI0_base+SPIx_CON_pclr, 1);
+	return reg32_read(SPI0_base+SPIx_BUF);
+}
+
+void sflash_dmaxfer(void *ptr, int len, int dir) {
+	reg32_wsmask(SPI0_base+SPIx_CON_dir, !!dir); //1=recv, 0=send
+	reg32_write(SPI0_base+SPIx_ADR, (uint32_t)ptr);
+	reg32_write(SPI0_base+SPIx_CNT, len);
+	while (!reg32_rsmask(SPI0_base+SPIx_CON_pnd));
+	reg32_wsmask(SPI0_base+SPIx_CON_pclr, 1);
+}
 
 
 
@@ -327,17 +362,18 @@ void JieLi(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	//irq_attach(1, ExceptionHandler_entry);
 
 	reg32_write(PERIENC_base+PERIENC_CON, 0);
-	reg32_write(PERIENC_base+PERIENC_KEY, 0xffff);
+	reg32_write(PERIENC_base+PERIENC_KEY, 0x0000);
 	reg32_write(PERIENC_base+PERIENC_ADR, 0x0);
 
-	#if 0
+	sflash_init();
 	disk_initialize(0);
 
 	reg32_wsmask(PERIENC_base+PERIENC_CON_en_sd0data, 1);
+	reg32_wsmask(PERIENC_base+PERIENC_CON_en_spi0dma, 1);
 
-	static uint8_t tmp[2][512];
+	static uint8_t tmp[512];
 
-	reg32_wsmask(PERIENC_base+PERIENC_CON_rstkey, 1);
+	/*reg32_wsmask(PERIENC_base+PERIENC_CON_rstkey, 1);
 	memset(tmp, 0, sizeof tmp);
 	strcpy((void *)&tmp[0], "kagami");
 	strcpy((void *)&tmp[1], "hiiragi");
@@ -352,72 +388,26 @@ void JieLi(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 		uint32_t resp;
 		sd_send_cmd(13, cRCA << 16, 1, &resp);
 		if ((resp & 0x1e00) == 0x800) break;
-	}
-
+	}*/
 
 	reg32_wsmask(PERIENC_base+PERIENC_CON_rstkey, 1);
-	disk_read(0, (void *)tmp, 2, sizeof tmp / 512);
+
+	disk_read(0, (void *)tmp, 0, sizeof tmp / 512);
+	hexdump(tmp, sizeof tmp);
+
+	reg32_wsmask(PERIENC_base+PERIENC_CON_rstkey, 1);
+
+	sflash_sel(1);
+	sflash_bytexfer(0x03);
+	sflash_bytexfer(0x00);
+	sflash_bytexfer(0x00);
+	sflash_bytexfer(0x00);
+	sflash_dmaxfer(tmp, sizeof tmp, 1);
+	sflash_sel(0);
 
 	hexdump(tmp, sizeof tmp);
-	#endif
 
-	static uint8_t buff[16384];
+	xputs("byte\n");
 
-	static FATFS ftfs;
-	xprintf("%d\n", f_mount(&ftfs, "0:", 1));
-
-	{
-		FRESULT fr;
-		FIL file;
-		UINT cnt;
-
-		if ((fr = f_open(&file, "0:testJL.bin", FA_WRITE|FA_CREATE_ALWAYS)) == FR_OK) {
-			uint32_t time = millis();
-			fr = f_write(&file, (void *)0x00000000, 0x40000, &cnt);
-			time = millis() - time;
-
-			xprintf("!!WRITE!!%u - %u byte/s\n", time, cnt * 1000 / time);
-
-			xprintf("%d\n", fr);
-			xprintf("---%u\n", cnt);
-			f_close(&file);
-		}
-
-		if ((fr = f_open(&file, "0:testJL.bin", FA_READ|FA_OPEN_EXISTING)) == FR_OK) {
-			uint32_t time = millis();
-			fr = f_read(&file, buff, sizeof buff, &cnt);
-			time = millis() - time;
-
-			xprintf("!!READ!!%u - %u byte/s\n", time, cnt * 1000 / time);
-
-			xprintf("%d\n", fr);
-			xprintf("---%u\n", cnt);
-			f_close(&file);
-		}
-
-		if ((fr = f_open(&file, "0:mstar.py", FA_READ|FA_OPEN_EXISTING)) == FR_OK) {
-			uint8_t tmp[256];
-			xprintf("%d\n", f_read(&file, tmp, sizeof tmp, &cnt));
-			xprintf("---%u\n", cnt);
-			for (int i = 0; i < cnt; i++) xputc(tmp[i]);
-			f_close(&file);
-		}
-	}
-
-	{
-		FRESULT fr;
-		FILINFO finfo;
-		DIR dir;
-
-		if ((fr = f_opendir(&dir, "0:")) == FR_OK) {
-			for (;;) {
-				if ((fr = f_readdir(&dir, &finfo)) != FR_OK) break;
-				if (!finfo.fname[0]) break;
-
-				xprintf("%s\n", finfo.fname);
-			}
-
-			f_closedir(&dir);
-		}
-	}
+	wallclk_deinit();
 }

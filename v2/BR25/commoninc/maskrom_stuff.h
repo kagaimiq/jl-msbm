@@ -10,7 +10,7 @@ void local_irq_disable(void);
 
 //--------------------------------
 
-void p33_buf(uint8_t val);
+uint8_t p33_buf(uint8_t val);
 void p33_xor_1byte(uint16_t addr, uint8_t val);
 void p33_and_1byte(uint16_t addr, uint8_t val);
 void p33_or_1byte(uint16_t addr, uint8_t val);
