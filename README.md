@@ -10,7 +10,7 @@ Maybe headers like `jl_xxxx_regs.h`, etc. will come handy, perhaps?
 
 ### CD02
 
-- [ac1082_isp_test](ac1082_isp_test/) - A test payload for the AC109N via the ISP, dumps some stuff
+- [ac1082_isp_test](ac1082_isp_test/) - A test payload for the AC109N via the ISP, dumps some stuff (also uploads to my Winnermicro W806 based ISP dongle which is now absent - want an RP2040 dongle!)
 
 ### BR17
 
@@ -23,6 +23,8 @@ Maybe headers like `jl_xxxx_regs.h`, etc. will come handy, perhaps?
   * [themodplayer.c](br17modplayer/themodplayer.c) - The MOD player itself. Plays a MOD right from the flash!
   * [thes3mplayer.c](br17modplayer/thes3mplayer.c) - Tried to do an S3M player but I'm too lazy <sub>(well..)</sub>
 - [br17freertosmod](br17freertosmod/) - FreeRTOS port test which plays a MOD
+  * for now you have to pull the FreeRTOS itself by yourself
+- [br17isp](br17isp/) - ISP test payload (uses PR2 as an bit-banged UART port since AC6908 have only two/four GPIOs in total - three are used for ISP)
 
 ### BR25
 
@@ -33,4 +35,5 @@ Maybe headers like `jl_xxxx_regs.h`, etc. will come handy, perhaps?
   * [jl_sd_test_3000.c](tbr25/jl_sd_test_3000.c) - Some SD host test
   * [modplayer.c](tbr25/modplayer.c) - That's the MOD player used for FM TX test
 - [br25freertos/](br25freertos/) - FreeRTOS port test with the same LCD marquee thing and a tick counter - I reached 300000 ticks!
-- [br25isp/](br25isp/) - A payload to upload via the ISP into the chip..
+- [br25isp/](br25isp/) - ISP test payload again
+- [br25minitest/](br25minitest/) - Yet another test thing, doesn't have too much thus it's the "mini test"
