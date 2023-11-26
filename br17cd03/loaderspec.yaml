@@ -1,0 +1,9 @@
+# for jl-uboot-tool
+
+br17:
+    usb:
+        file: ac6900loader.bin
+        address: 0x2000
+
+        info:
+            protocol-version: v1
