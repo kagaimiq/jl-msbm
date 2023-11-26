@@ -2,23 +2,18 @@
 #include <jl_irq.h>
 #include <jl_p33.h>
 
+#include "mizutrax.h"
+
+#include <string.h>
+#include <xprintf.h>
+
 void cpuloops(int cnt) {
 	while (cnt--)
 		asm volatile ("nop");
 }
 
-void JieLi(uint32_t r0) {
-#if 0
-	JL_PORTB->DIR &= ~(1<<5);
 
-	for (;;) {
-		p33_xfer(0, P33_OP_RMW_OR, 0x80, 0x40);
-
-		JL_PORTB->OUT ^= (1<<5);
-		cpuloops(100000);
-	}
-#endif
-
+void spiffy(void) {
 	/* PD0=SCK, PD1=MOSI, PD2=MISO, PD3=SCK, PD4=Vdd */
 	JL_PORTD->DIR &= ~0x1B;
 	JL_PORTD->DIR |=  0x04;
@@ -31,6 +26,7 @@ void JieLi(uint32_t r0) {
 
 	cpuloops(1000);
 
+#if 0
 	JL_PERIENC->CON = (1<<0) | (1<<1);
 	JL_PERIENC->KEY = 0x77A;
 	JL_PERIENC->ADR = 0x10;
@@ -63,4 +59,24 @@ void JieLi(uint32_t r0) {
 	JL_SPI0->CON |= (1<<14);
 
 	JL_PORTD->OUT |= (1<<3);	/* CS high */
+#endif
+}
+
+
+#if 0
+extern void *mask_putchar;
+int printf(const char *fmt, ...);
+#endif
+
+
+void JieLi(uint32_t r0) {
+	mzt_init();
+	xdev_out(mzt_putc);
+
+	spiffy();
+
+	xputs("----- SPI flash done -----");
+
+	*(uint32_t *)0x31CDC = (uint32_t)mzt_putc;
+	((void (*)(char *, ...))0x117FE4)("Helllo %x\n", JL_SYSTEM->CHIP_ID);
 }

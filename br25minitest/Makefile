@@ -3,6 +3,8 @@ TARGET = JLmikro
 OBJS = \
 	head.o \
 	sakiguchi.o \
+	com/xprintf.o \
+	com/mizutrax.o \
 	jl/jl_irq.o \
 	jl/jl_p33.o
 
@@ -12,6 +14,8 @@ LDFLAGS = -Tlink.ld -lc -lm -lcompiler-rt
 
 CFLAGS += -mcpu=r3
 LDFLAGS += --plugin-opt=mcpu=r3 --plugin-opt=mattr=+fprev1
+
+CFLAGS += -D__JIELI_BR25__
 
 #------------------------------------------------------------------------
 
