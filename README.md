@@ -19,7 +19,7 @@ Maybe headers like `jl_xxxx_regs.h`, etc. will come handy, perhaps?
   * [usbattempt2.c](tbr17/usbattempt2.c) - Another USB attempt, essentially
   * [usb-nuts.c](tbr17/usb-nuts.c) - Straight up ripped code from the ROM that does the USB magic..
 - [br17cd03](br17cd03/) - Tried to emulate an CD03 (AC410N) loader to work on the AC410N support, haven't done yet..
-- [br17modplayer](br17modplayer/) - A terrible MOD player
+- [br17modplayer](br17modplayer/) - An MOD player attempt
   * [themodplayer.c](br17modplayer/themodplayer.c) - The MOD player itself. Plays a MOD right from the flash!
   * [thes3mplayer.c](br17modplayer/thes3mplayer.c) - Tried to do an S3M player but I'm too lazy <sub>(well..)</sub>
 - [br17freertosmod](br17freertosmod/) - FreeRTOS port test which plays a MOD
@@ -37,3 +37,11 @@ Maybe headers like `jl_xxxx_regs.h`, etc. will come handy, perhaps?
 - [br25freertos/](br25freertos/) - FreeRTOS port test with the same LCD marquee thing and a tick counter - I reached 300000 ticks!
 - [br25isp/](br25isp/) - ISP test payload again
 - [br25minitest/](br25minitest/) - Yet another test thing, doesn't have too much thus it's the "mini test"
+
+## Borrowed stuff
+
+- Most hardware-related code ripped off the JieLi's binary blobs or like.
+- The "Aixoid_9x20" (`AIXOID9.F20`) font is taken from [fontraption](https://github.com/viler-int10h/vga-text-mode-fonts)
+- A lot of instances of [xprintf](http://elm-chan.org/fsw/strf/xprintf.html) - just because I'm used to it.
+- A bit of [FatFs](http://elm-chan.org/fsw/ff/00index_e.html) too.
+- More is to be found out..
